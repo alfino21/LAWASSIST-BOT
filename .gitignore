@@ -7,3 +7,4 @@ uploads/
 vector_db/
 .git.zip
 analysis_report.pdf
+env/
