@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+google-genai
+python-dotenv
+jinja2
+python-multipart
+pdfplumber
+PyPDF2
+chromadb
+langchain
+langchain-community
+sentence-transformers

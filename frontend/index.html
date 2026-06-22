@@ -2,114 +2,636 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LawAssistBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0F1C2E;
+      --navy-mid:   #1A2E47;
+      --navy-light: #1E3A5F;
+      --gold:       #C9A84C;
+      --gold-light: #E8C96A;
+      --parchment:  #F7F4EF;
+      --border:     #DDD8CC;
+      --text:       #1A1A2E;
+      --muted:      #6B7280;
+      --white:      #FFFFFF;
+      --success:    #2D6A4F;
+      --danger:     #9B2335;
+      --warning:    #B45309;
+      --panel-bg:   #FDFCFA;
+    }
+
     body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f9;
-      color: #333;
-      max-width: 900px;
-      margin: auto;
-      padding: 40px 20px;
+      font-family: 'Inter', sans-serif;
+      background: var(--parchment);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 40px;
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--navy);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(201,168,76,0.25);
     }
 
-    .section {
-      background: white;
-      padding: 25px 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .section h2 {
-      color: #34495e;
-      margin-bottom: 15px;
-    }
-
-    textarea, input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      margin-bottom: 15px;
-      font-size: 16px;
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
       border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
     }
 
-    button {
-      background-color: #3498db;
-      color: white;
+    .topbar h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    .topbar h1 span {
+      color: var(--gold);
+    }
+
+    .topbar-tagline {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ── Shell ── */
+    .shell {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── Sidebar nav ── */
+    .sidebar {
+      width: 220px;
+      background: var(--navy);
+      flex-shrink: 0;
+      padding: 28px 0 28px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav-section-label {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      padding: 0 20px 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px 20px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.18s ease;
+      color: rgba(255,255,255,0.55);
+      font-size: 13.5px;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.85);
+    }
+
+    .nav-item.active {
+      border-left-color: var(--gold);
+      background: rgba(201,168,76,0.1);
+      color: var(--gold-light);
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .sidebar-footer p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      line-height: 1.6;
+    }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      padding: 36px 40px;
+      overflow-y: auto;
+    }
+
+    .panel {
+      display: none;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header {
+      margin-bottom: 28px;
+    }
+
+    .panel-eyebrow {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .panel-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+
+    .panel-header p {
+      margin-top: 7px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--navy-mid);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* ── Form controls ── */
+    select, textarea, input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      outline: none;
+      transition: border-color 0.18s;
+      margin-bottom: 16px;
+      resize: vertical;
+    }
+
+    select:focus, textarea:focus, input[type="text"]:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 22px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 7px;
       border: none;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.18s ease;
+      letter-spacing: 0.02em;
     }
 
-    button:hover {
-      background-color: #2980b9;
+    .btn-primary {
+      background: var(--navy);
+      color: var(--white);
     }
 
-    .output {
-      white-space: pre-wrap;
-      background: #ecf0f1;
-      border-left: 4px solid #2980b9;
-      padding: 15px;
-      border-radius: 6px;
-      font-size: 15px;
+    .btn-primary:hover {
+      background: var(--navy-light);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(15,28,46,0.25);
     }
 
-    footer {
-      text-align: center;
-      color: #aaa;
-      margin-top: 40px;
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+      color: var(--navy);
+    }
+
+    .btn-gold:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(201,168,76,0.35);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--navy);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Output box ── */
+    .output-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--navy-mid);
+      border-radius: 7px;
+      padding: 18px 20px;
       font-size: 14px;
+      line-height: 1.75;
+      color: var(--text);
+      white-space: pre-wrap;
+      min-height: 60px;
+      margin-top: 4px;
+    }
+
+    .output-box.empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── Risk badge ── */
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+    }
+
+    .risk-badge.high   { background: #FEE2E2; color: var(--danger); }
+    .risk-badge.medium { background: #FEF3C7; color: var(--warning); }
+    .risk-badge.low    { background: #D1FAE5; color: var(--success); }
+
+    /* ── File upload zone ── */
+    .file-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      background: var(--white);
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .file-zone:hover, .file-zone.drag-over {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.04);
+    }
+
+    .file-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .file-zone-icon { font-size: 28px; margin-bottom: 8px; }
+
+    .file-zone-text {
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    .file-zone-text strong {
+      color: var(--navy);
+    }
+
+    .file-name-display {
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 22px 0;
+    }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      font-size: 12px;
+      padding: 14px;
+      letter-spacing: 0.04em;
+    }
+
+    footer span { color: var(--gold); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .shell { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; padding: 0; overflow-x: auto; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      .sidebar-footer, .nav-section-label { display: none; }
+      .nav-item { padding: 14px 16px; border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+      .nav-item.active { border-bottom-color: var(--gold); border-left-color: transparent; }
+      .main { padding: 24px 18px; }
     }
   </style>
 </head>
 <body>
 
-  <h1>⚖️ LawAssistBot</h1>
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-icon">⚖️</div>
+      <h1>Law<span>Assist</span>Bot</h1>
+    </div>
+    <div class="topbar-tagline">Legal Intelligence Platform</div>
+  </header>
 
-  <div class="section">
-    <h2>📄 Generate Legal Document</h2>
-    <select id="docType">
-      <option value="rental agreement">Rental Agreement</option>
-      <option value="non-disclosure agreement">NDA</option>
-    </select>
-    <textarea id="docDetails" rows="5" placeholder='Enter details in JSON format...'></textarea>
-    <button onclick="generateDocument()">Generate Document</button>
-    <div class="output" id="docOutput"></div>
-  </div>
+  <div class="shell">
 
-  <div class="section">
-    <h2>💡 Ask Legal Advice</h2>
-    <textarea id="legalQuestion" rows="3" placeholder="Type your legal question here..."></textarea>
-    <button onclick="askAdvice()">Get Advice</button>
-    <div class="output" id="adviceOutput"></div>
-  </div>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="nav-section-label">Tools</div>
 
-  <div class="section">
-    <h2>🧾 Summarize Case</h2>
-    <textarea id="caseText" rows="5" placeholder="Paste the case details to summarize..."></textarea>
-    <button onclick="summarizeCase()">Summarize</button>
-    <div class="output" id="summaryOutput"></div>
+      <div class="nav-item active" onclick="showPanel('generate', this)">
+        <span class="nav-icon">📄</span> Generate Document
+      </div>
+      <div class="nav-item" onclick="showPanel('advice', this)">
+        <span class="nav-icon">💡</span> Legal Advice
+      </div>
+      <div class="nav-item" onclick="showPanel('summarize', this)">
+        <span class="nav-icon">🧾</span> Summarize Case
+      </div>
+      <div class="nav-item" onclick="showPanel('pdf', this)">
+        <span class="nav-icon">📑</span> Analyze PDF
+      </div>
+      <div class="nav-item" onclick="showPanel('search', this)">
+        <span class="nav-icon">📚</span> Law Search
+      </div>
+
+      <div class="sidebar-footer">
+        <p>LawAssistBot v2.0<br>© 2025 LegalTech Innovations</p>
+      </div>
+    </nav>
+
+    <!-- Main panels -->
+    <main class="main">
+
+      <!-- Generate Document -->
+      <div class="panel active" id="panel-generate">
+        <div class="panel-header">
+          <div class="panel-eyebrow">Document Drafting</div>
+          <h2>Generate Legal Document</h2>
+          <p>Select a document type and provide the necessary details to produce a draft.</p>
+        </div>
+        <div class="card">
+          <label class="card-label">Document Type</label>
+          <select id="docType">
+            <option value="rental agreement">Rental Agreement</option>
+            <option value="non-disclosure agreement">Non-Disclosure Agreement (NDA)</option>
+          </select>
+
+          <label class="card-label">Details <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--muted)">(JSON format)</span></label>
+          <textarea id="docDetails" rows="5" placeholder='e.g. {"landlord": "John Doe", "tenant": "Jane Smith", "rent": 1200}'></textarea>
+
+          <button class="btn btn-primary" onclick="generateDocument()" id="btn-generate">
+            <span>Generate Document</span>
+          </button>
+        </div>
+        <div class="divider"></div>
+        <label class="card-label">Generated Document</label>
+        <div class="output-box empty" id="docOutput">Your document will appear here…</div>
+      </div>
+
+      <!-- Legal Advice -->
+      <div class="panel" id="panel-advice">
+        <div class="panel-header">
+          <div class="panel-eyebrow">Consultation</div>
+          <h2>Ask for Legal Advice</h2>
+          <p>Describe your legal situation or question and receive a concise, informed response.</p>
+        </div>
+        <div class="card">
+          <label class="card-label">Your Question</label>
+          <textarea id="legalQuestion" rows="4" placeholder="e.g. Can my landlord enter my property without notice?"></textarea>
+          <button class="btn btn-primary" onclick="askAdvice()" id="btn-advice">
+            <span>Get Advice</span>
+          </button>
+        </div>
+        <div class="divider"></div>
+        <label class="card-label">Response</label>
+        <div class="output-box empty" id="adviceOutput">Legal guidance will appear here…</div>
+      </div>
+
+      <!-- Summarize Case -->
+      <div class="panel" id="panel-summarize">
+        <div class="panel-header">
+          <div class="panel-eyebrow">Case Analysis</div>
+          <h2>Summarize a Case</h2>
+          <p>Paste case details or lengthy legal text to receive a structured summary.</p>
+        </div>
+        <div class="card">
+          <label class="card-label">Case Text</label>
+          <textarea id="caseText" rows="6" placeholder="Paste the full case text or facts here…"></textarea>
+          <button class="btn btn-primary" onclick="summarizeCase()" id="btn-summarize">
+            <span>Summarize Case</span>
+          </button>
+        </div>
+        <div class="divider"></div>
+        <label class="card-label">Summary</label>
+        <div class="output-box empty" id="summaryOutput">Case summary will appear here…</div>
+      </div>
+
+      <!-- Analyze PDF -->
+      <div class="panel" id="panel-pdf">
+        <div class="panel-header">
+          <div class="panel-eyebrow">Document Intelligence</div>
+          <h2>Analyze Legal PDF</h2>
+          <p>Upload a contract or legal document for risk assessment and clause analysis.</p>
+        </div>
+        <div class="card">
+          <label class="card-label">Upload Document</label>
+          <div class="file-zone" id="fileZone">
+            <input type="file" id="pdfFile" accept=".pdf" onchange="onFileChange(this)">
+            <div class="file-zone-icon">📂</div>
+            <div class="file-zone-text"><strong>Click to upload</strong> or drag & drop a PDF</div>
+            <div class="file-name-display" id="fileName"></div>
+          </div>
+          <button class="btn btn-gold" onclick="uploadPDF()" id="btn-pdf">
+            <span>Analyze Document</span>
+          </button>
+        </div>
+        <div id="riskBadgeContainer"></div>
+        <div class="divider"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <label class="card-label" style="margin-bottom:0">Analysis Results</label>
+          <button class="btn btn-outline" onclick="downloadReport()" style="padding:7px 16px;font-size:12.5px;">
+            📥 Download Report
+          </button>
+        </div>
+        <div class="output-box empty" id="pdfOutput">Analysis results will appear here…</div>
+      </div>
+
+      <!-- Law Search -->
+      <div class="panel" id="panel-search">
+        <div class="panel-header">
+          <div class="panel-eyebrow">Knowledge Base</div>
+          <h2>Legal Knowledge Search</h2>
+          <p>Query statutes, sections, articles, and legal precedents.</p>
+        </div>
+        <div class="card">
+          <label class="card-label">Search Query</label>
+          <textarea id="ragQuestion" rows="3" placeholder="e.g. What does Article 21 of the Indian Constitution say?"></textarea>
+          <button class="btn btn-primary" onclick="searchLaw()" id="btn-search">
+            <span>Search</span>
+          </button>
+        </div>
+        <div class="divider"></div>
+        <label class="card-label">Results</label>
+        <div class="output-box empty" id="ragOutput">Search results will appear here…</div>
+      </div>
+
+    </main>
   </div>
 
   <footer>
-    &copy; 2025 LawAssistBot | Developed for LegalTech Innovations
+    © 2025 <span>LawAssistBot</span> · Developed for LegalTech Innovations · Not a substitute for professional legal counsel
   </footer>
 
   <script>
     const API_BASE = "http://127.0.0.1:8000";
+    let latestAnalysis = "";
+
+    function showPanel(id, el) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('panel-' + id).classList.add('active');
+      el.classList.add('active');
+    }
+
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span><span>Processing…</span>';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.label || '<span>Submit</span>';
+      }
+    }
+
+    function clearEmpty(el) {
+      el.classList.remove('empty');
+    }
+
+    // Store original button labels on load
+    window.addEventListener('DOMContentLoaded', () => {
+      ['btn-generate','btn-advice','btn-summarize','btn-pdf','btn-search'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.dataset.label = btn.innerHTML;
+      });
+    });
+
+    function onFileChange(input) {
+      const display = document.getElementById('fileName');
+      display.textContent = input.files.length ? '📎 ' + input.files[0].name : '';
+    }
 
     async function generateDocument() {
+      const out = document.getElementById("docOutput");
       try {
+        setLoading('btn-generate', true);
         const type = document.getElementById("docType").value;
         const details = JSON.parse(document.getElementById("docDetails").value);
         const res = await fetch(`${API_BASE}/generate-document/`, {
@@ -118,32 +640,151 @@
           body: JSON.stringify({ type, details })
         });
         const data = await res.json();
-        document.getElementById("docOutput").innerText = data.document || "❌ Error generating document.";
+        clearEmpty(out);
+        out.innerText = data.document || "Unable to generate the document. Please try again.";
       } catch (err) {
-        document.getElementById("docOutput").innerText = "⚠️ Invalid JSON format.";
+        out.classList.add('empty');
+        out.innerText = "⚠️ Please check that your details are in valid JSON format.";
+      } finally {
+        setLoading('btn-generate', false);
+        document.getElementById('btn-generate').dataset.label = '<span>Generate Document</span>';
+        document.getElementById('btn-generate').innerHTML = '<span>Generate Document</span>';
+        document.getElementById('btn-generate').disabled = false;
       }
     }
 
     async function askAdvice() {
-      const question = document.getElementById("legalQuestion").value;
-      const res = await fetch(`${API_BASE}/legal-advice/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
-      });
-      const data = await res.json();
-      document.getElementById("adviceOutput").innerText = data.advice || "❌ Error getting advice.";
+      const out = document.getElementById("adviceOutput");
+      try {
+        setLoading('btn-advice', true);
+        const question = document.getElementById("legalQuestion").value;
+        const res = await fetch(`${API_BASE}/legal-advice/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        clearEmpty(out);
+        out.innerText = data.advice || "Unable to retrieve advice at this time.";
+      } catch (err) {
+        out.innerText = "⚠️ Request failed. Please check your connection.";
+      } finally {
+        document.getElementById('btn-advice').innerHTML = '<span>Get Advice</span>';
+        document.getElementById('btn-advice').disabled = false;
+      }
     }
 
     async function summarizeCase() {
-      const text = document.getElementById("caseText").value;
-      const res = await fetch(`${API_BASE}/summarize/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+      const out = document.getElementById("summaryOutput");
+      try {
+        setLoading('btn-summarize', true);
+        const text = document.getElementById("caseText").value;
+        const res = await fetch(`${API_BASE}/summarize/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        clearEmpty(out);
+        out.innerText = data.summary || "Unable to summarize. Please try again.";
+      } catch (err) {
+        out.innerText = "⚠️ Request failed. Please check your connection.";
+      } finally {
+        document.getElementById('btn-summarize').innerHTML = '<span>Summarize Case</span>';
+        document.getElementById('btn-summarize').disabled = false;
+      }
+    }
+
+    async function uploadPDF() {
+      const fileInput = document.getElementById("pdfFile");
+      const out = document.getElementById("pdfOutput");
+      const badge = document.getElementById("riskBadgeContainer");
+
+      if (!fileInput.files.length) {
+        out.classList.add('empty');
+        out.innerText = "⚠️ Please select a PDF file first.";
+        return;
+      }
+
+      setLoading('btn-pdf', true);
+      out.innerText = "Analyzing document…";
+      badge.innerHTML = "";
+
+      try {
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        const response = await fetch(`${API_BASE}/analyze-pdf`, { method: "POST", body: formData });
+        const data = await response.json();
+        latestAnalysis = data.analysis;
+
+        if (data.analysis.includes("High Risk")) {
+          badge.innerHTML = '<div class="risk-badge high">🔴 High Risk Document</div>';
+        } else if (data.analysis.includes("Medium Risk")) {
+          badge.innerHTML = '<div class="risk-badge medium">🟠 Medium Risk Document</div>';
+        } else if (data.analysis.includes("Low Risk")) {
+          badge.innerHTML = '<div class="risk-badge low">🟢 Low Risk Document</div>';
+        }
+
+        clearEmpty(out);
+        out.innerText = data.analysis || "Analysis could not be completed.";
+      } catch (error) {
+        out.innerText = "⚠️ Error analyzing document. Please try again.";
+      } finally {
+        document.getElementById('btn-pdf').innerHTML = '<span>Analyze Document</span>';
+        document.getElementById('btn-pdf').disabled = false;
+      }
+    }
+
+    async function downloadReport() {
+      if (!latestAnalysis) { alert("Please run an analysis first."); return; }
+      try {
+        const response = await fetch(`${API_BASE}/download-analysis`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ report: latestAnalysis })
+        });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "analysis_report.pdf"; a.click();
+      } catch(e) { alert("Download failed. Please try again."); }
+    }
+
+    async function searchLaw() {
+      const out = document.getElementById("ragOutput");
+      try {
+        setLoading('btn-search', true);
+        const question = document.getElementById("ragQuestion").value;
+        const res = await fetch(`${API_BASE}/legal-search`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        clearEmpty(out);
+        out.innerText = data.answer;
+      } catch (err) {
+        out.innerText = "⚠️ Search failed. Please check your connection.";
+      } finally {
+        document.getElementById('btn-search').innerHTML = '<span>Search</span>';
+        document.getElementById('btn-search').disabled = false;
+      }
+    }
+
+    // Drag and drop on file zone
+    const zone = document.getElementById('fileZone');
+    if (zone) {
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        const input = document.getElementById('pdfFile');
+        if (e.dataTransfer.files.length) {
+          input.files = e.dataTransfer.files;
+          onFileChange(input);
+        }
       });
-      const data = await res.json();
-      document.getElementById("summaryOutput").innerText = data.summary || "❌ Error summarizing case.";
     }
   </script>
 

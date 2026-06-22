@@ -1,5 +1,20 @@
-from utils.gpt_utils import generate_response
+from services.gpt_utils import generate_response
 
-def legal_advice(question: str) -> str:
-    prompt = f"Provide basic legal advice (not as a lawyer) for the following question:\n\n{question}"
+
+def legal_advice(question: str):
+
+    prompt = f"""
+You are LawAssistBot.
+
+Provide educational legal information.
+
+Important:
+- Do not claim to be a lawyer.
+- Mention that professional legal advice may be required.
+- Give practical next steps.
+
+Question:
+{question}
+"""
+
     return generate_response(prompt)
